@@ -6,7 +6,7 @@ from selenium.common.exceptions import TimeoutException
 import datetime
 import sys, getopt
 import threading
-
+import os
 
 def periodically_check_wam(result_filename, username, password, course_title, email_account, email_password,
                            time_frequency=600):
@@ -50,13 +50,16 @@ def send_notification(result, email_account, email_password):
 def check_wam(result_filename, username, password, course_title, email_account, email_password):
     print("(Logging in...)")
 
-    with open(result_filename, 'w+') as f:
-        lines = f.readlines()
+    if os.path.exists(result_filename):
+        with open(result_filename, 'r') as f:
+            lines = f.readlines()
 
-        if len(lines) == 0:
-            prev_result_text = ""
-        else:
-            prev_result_text = lines[0]
+            if len(lines) == 0:
+                prev_result_text = ""
+            else:
+                prev_result_text = lines[0]
+    else:
+        prev_result_text = ""
 
     options = webdriver.ChromeOptions()
     options.add_argument('headless')
@@ -87,7 +90,7 @@ def check_wam(result_filename, username, password, course_title, email_account, 
         print(result_text)
         print("(As at " + datetime.datetime.now().strftime("%I:%M%p on %B %d, %Y") + ")")
 
-        with open(result_filename, 'w') as f:
+        with open(result_filename, 'w+') as f:
             f.write(result_text)
 
             if prev_result_text == result_text:
